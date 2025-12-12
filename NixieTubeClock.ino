@@ -7,4 +7,6 @@ void setup() {
   ntc->init();
 }
 
-void loop() {}
+void loop() {
+  ntc->test();
+};

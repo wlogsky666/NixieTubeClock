@@ -1,7 +1,7 @@
 #ifndef NIXIE_TUBE_CLOCK_H
 #define NIXIE_TUBE_CLOCK_H
 
-#include "ShiftRegister.h"
+#include "NixieTube.h"
 
 class NixieTubeClock {
 public:
@@ -9,8 +9,10 @@ public:
 
   void init();
 
+  void test();
+
 private:
-  ShiftRegister::Controller sr_ctrl_;
+  NixieTube::Controller nt_ctrl_;
 };
 
 #endif // NIXIE_TUBE_CLOCK_H

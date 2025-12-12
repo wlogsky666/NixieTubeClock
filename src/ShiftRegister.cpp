@@ -83,11 +83,6 @@ ShiftRegister::Controller::Controller(uint8_t latch_pin, uint8_t mosi_pin,
     : latch_pin_(latch_pin), mosi_pin_(mosi_pin), sck_pin_(sck_pin),
       num_tubes_(num_tubes), use_sw_spi_(true) {}
 
-void ShiftRegister::Controller::_clear() {
-  uint8_t zeros[num_tubes_] = {0};
-  _transfer(zeros);
-}
-
 uint8_t ShiftRegister::Controller::_convertToByte(uint8_t high, uint8_t low) {
   // Convert 2 digits into 1 bytes for 74HC595 IC
   // If digit is over range, use 9 as default
@@ -115,7 +110,22 @@ void ShiftRegister::Controller::_sendByte(uint8_t digit1, uint8_t digit2) {
   }
 }
 
-void ShiftRegister::Controller::_transfer(const uint8_t *digits) {
+void ShiftRegister::Controller::init() {
+  pinMode(latch_pin_, OUTPUT);
+  digitalWrite(latch_pin_, LOW);
+
+  if (use_sw_spi_) {
+    pinMode(mosi_pin_, OUTPUT);
+    pinMode(sck_pin_, OUTPUT);
+    digitalWrite(mosi_pin_, LOW);
+    digitalWrite(sck_pin_, LOW);
+  } else {
+    SPI.begin();
+    SPI.beginTransaction(SPISettings(SPI_SPEED, BIT_ORDER, SPI_MODE0));
+  }
+}
+
+void ShiftRegister::Controller::transfer(const uint8_t *digits) {
   uint8_t num_tubes = num_tubes_;
 
   digitalWrite(latch_pin_, LOW);
@@ -133,29 +143,4 @@ void ShiftRegister::Controller::_transfer(const uint8_t *digits) {
   }
 
   digitalWrite(latch_pin_, HIGH);
-}
-
-void ShiftRegister::Controller::init() {
-  pinMode(latch_pin_, OUTPUT);
-  digitalWrite(latch_pin_, LOW);
-
-  if (use_sw_spi_) {
-    pinMode(mosi_pin_, OUTPUT);
-    pinMode(sck_pin_, OUTPUT);
-    digitalWrite(mosi_pin_, LOW);
-    digitalWrite(sck_pin_, LOW);
-  } else {
-    SPI.begin();
-    SPI.beginTransaction(SPISettings(SPI_SPEED, BIT_ORDER, SPI_MODE0));
-  }
-}
-
-template <typename... Args>
-void ShiftRegister::Controller::transfer(Args... digits) {
-  if (sizeof...(Args) != num_tubes_) {
-    Serial.print("Error: Num of tubes not matched!");
-    return;
-  }
-
-  _transfer({(uint8_t)digits...});
 }

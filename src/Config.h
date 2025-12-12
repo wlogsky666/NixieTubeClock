@@ -1,3 +1,8 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+namespace CONFIG {
+
 // ====================================================================
 // HARDWARE CONFIGURATION
 // ====================================================================
@@ -10,7 +15,10 @@
 // ====================================================================
 // Settings
 // ====================================================================
-const int NUM_TUBES = 2;
+/**
+ * @brief Number of Nixie tubes in the system.
+ */
+const int NUM_TUBES = 4;
 
 // ====================================================================
 // SPI PINS ASSIGNMENT
@@ -32,3 +40,17 @@ const int SPI_LATCH_PIN = 10;
 #else
 #error "The dev board is unspecified or not supported！"
 #endif
+
+// ====================================================================
+// Nixie Tube Decimal Points (Dots)
+// ====================================================================
+/**
+ * @brief Array of digital pins used to control the Nixie tube decimal points.
+ *
+ * Each pin is connected to the BASE of an MPSA42 NPN transistor.
+ */
+const int DOT_PINS[NUM_TUBES] = {4, 5, 6, 7};
+
+} // namespace CONFIG
+
+#endif // SHIFT_REGISTER_DRIVER_H

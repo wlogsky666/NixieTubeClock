@@ -9,6 +9,8 @@ To run this code, you will need the following key components:
 - Shift Registers: 74HC595 (1 per 2 tubes, due to 8-bit output).
 - Power Supply: A dedicated 170V DC supply for the Nixie anodes, and a 5V DC supply for the logic circuits.
 
+<img width="1190" height="845" alt="SCH_Schematic1_1-P1_2025-12-18 (1)" src="https://github.com/user-attachments/assets/d6f38f6a-1a67-4bbb-ad7e-032c4fb348f7" />
+
 ## Wiring and Setup
 The project uses SPI communication to cascade data through the 74HC595 shift registers.
 1. SPI Connection: Connect the SCK and LATCH pins from the MCU to all 74HC595 ICs.

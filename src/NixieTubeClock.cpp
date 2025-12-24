@@ -1,9 +1,12 @@
 #include "NixieTubeClock.h"
 #include "Config.h"
+#include "Logger.h"
 
 NixieTubeClock::NixieTubeClock() : nt_ctrl_() {}
 
 void NixieTubeClock::init() {
+  Log.begin();
+
   // Initialize all peripherals
   nt_ctrl_.init();
 }

@@ -20,6 +20,11 @@ namespace CONFIG {
  */
 const int NUM_TUBES = 4;
 
+/**
+ * @brief Serial port baud rate
+ */
+const int BAUD_RATE = 115200;
+
 // ====================================================================
 // SPI PINS ASSIGNMENT
 // ====================================================================

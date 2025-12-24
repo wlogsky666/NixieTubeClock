@@ -67,6 +67,8 @@
 
 #include "ShiftRegister.h"
 
+namespace ShiftRegister {
+
 // Several dev boards does not support hardware-accelerated bit reversal.
 // This 8-bit Bit Reversal logic is CPU-intensive and might introduce
 // noticeable delays on time-sensitive tasks.
@@ -74,21 +76,16 @@
 const auto BIT_ORDER = MSBFIRST;
 const auto SPI_SPEED = 1000000; // 1 MHz
 
-ShiftRegister::Controller::Controller(uint8_t latch_pin, uint8_t num_tubes)
+Controller::Controller(uint8_t latch_pin, uint8_t num_tubes)
     : latch_pin_(latch_pin), mosi_pin_(0), sck_pin_(0), num_tubes_(num_tubes),
       use_sw_spi_(false) {}
 
-ShiftRegister::Controller::Controller(uint8_t latch_pin, uint8_t mosi_pin,
-                                      uint8_t sck_pin, uint8_t num_tubes)
+Controller::Controller(uint8_t latch_pin, uint8_t mosi_pin, uint8_t sck_pin,
+                       uint8_t num_tubes)
     : latch_pin_(latch_pin), mosi_pin_(mosi_pin), sck_pin_(sck_pin),
       num_tubes_(num_tubes), use_sw_spi_(true) {}
 
-uint8_t ShiftRegister::Controller::_convertToByte(uint8_t high, uint8_t low) {
-  // Convert 2 digits into 1 bytes for 74HC595 IC
-  // If digit is over range, use 9 as default
-  high = min(high, 9);
-  low = min(low, 9);
-
+uint8_t Controller::_convertToByte(uint8_t high, uint8_t low) {
   if (BIT_ORDER == MSBFIRST) {
     return (high << 4) | low;
   } else if (BIT_ORDER == LSBFIRST) {
@@ -102,15 +99,16 @@ uint8_t ShiftRegister::Controller::_convertToByte(uint8_t high, uint8_t low) {
   return 0;
 }
 
-void ShiftRegister::Controller::_sendByte(uint8_t digit1, uint8_t digit2) {
+void Controller::_sendByte(uint8_t digit1, uint8_t digit2) {
+  const uint8_t packed = _convertToByte(digit1 & 0xf, digit2 & 0xf);
   if (use_sw_spi_) {
-    shiftOut(mosi_pin_, sck_pin_, BIT_ORDER, _convertToByte(digit1, digit2));
+    shiftOut(mosi_pin_, sck_pin_, BIT_ORDER, packed);
   } else {
-    SPI.transfer(_convertToByte(digit1, digit2));
+    SPI.transfer(packed);
   }
 }
 
-void ShiftRegister::Controller::init() {
+void Controller::init() {
   pinMode(latch_pin_, OUTPUT);
   digitalWrite(latch_pin_, LOW);
 
@@ -125,7 +123,7 @@ void ShiftRegister::Controller::init() {
   }
 }
 
-void ShiftRegister::Controller::transfer(const uint8_t *digits) {
+void Controller::transfer(const uint8_t *digits) {
   uint8_t num_tubes = num_tubes_;
 
   digitalWrite(latch_pin_, LOW);
@@ -144,3 +142,5 @@ void ShiftRegister::Controller::transfer(const uint8_t *digits) {
 
   digitalWrite(latch_pin_, HIGH);
 }
+
+} // namespace ShiftRegister

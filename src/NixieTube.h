@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include "Config.h"
+#include "Logger.h"
 #include "ShiftRegister.h"
 
 namespace NixieTube {
@@ -18,7 +19,7 @@ public:
   void init();
 
   /**
-   * @brief Reset all digits and dots state to the default.
+   * @brief Reset all digits and dots to the invisible state.
    */
   void clear();
 
@@ -37,7 +38,7 @@ public:
    */
   template <typename... Args> void setDigits(Args... digits) {
     if (sizeof...(Args) != num_tubes_) {
-      Serial.print("Error: Num of tubes not matched!");
+      Log.error(TAG, "Num of tubes %d not matched!", num_tubes_);
       return;
     }
 
@@ -49,6 +50,7 @@ public:
   }
 
 private:
+  const char *TAG = "NixieTube";
   ShiftRegister::Controller sr_ctrl_;
   const uint8_t num_tubes_;
   bool dot_state_[CONFIG::NUM_TUBES] = {0};

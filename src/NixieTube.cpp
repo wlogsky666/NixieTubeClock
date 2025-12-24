@@ -1,19 +1,24 @@
 #include "NixieTube.h"
 #include "Config.h"
+#include "Logger.h"
 
-NixieTube::Controller::Controller()
+namespace NixieTube {
+
+Controller::Controller()
     : sr_ctrl_(CONFIG::SPI_LATCH_PIN, CONFIG::NUM_TUBES),
       num_tubes_(CONFIG::NUM_TUBES) {}
 
-void NixieTube::Controller::init() {
+void Controller::init() {
   sr_ctrl_.init();
   for (int i = 0; i < num_tubes_; ++i) {
     pinMode(CONFIG::DOT_PINS[i], OUTPUT);
     digitalWrite(CONFIG::DOT_PINS[i], LOW);
   }
+
+  Log.info(TAG, "Initialization Ready, num_tubes = %d.", num_tubes_);
 }
 
-void NixieTube::Controller::clear() {
+void Controller::clear() {
   const uint8_t zeros[num_tubes_] = {0};
   setDigits(zeros);
   for (int i = 0; i < num_tubes_; ++i) {
@@ -27,7 +32,8 @@ static void generateRandomDigits(uint8_t r[], int num_tubes) {
   }
 }
 
-void NixieTube::Controller::runAntiPoisoning(int cycles = 1) {
+void Controller::runAntiPoisoning(int cycles = 1) {
+  Log.debug(TAG, "Running Auto Poisoning Process, cycles = %d", cycles);
   int roll_duration_ms = 200;
   int fade_duration_ms = 1500;
   int lock_delay_duration_ms = 500;
@@ -79,9 +85,9 @@ void NixieTube::Controller::runAntiPoisoning(int cycles = 1) {
   }
 }
 
-void NixieTube::Controller::setDot(uint8_t index, bool en) {
+void Controller::setDot(uint8_t index, bool en) {
   if (index >= num_tubes_) {
-    Serial.print("Invalid index of tubes");
+    Log.error(TAG, "Invalid index of tubes, idx = %d", index);
     return;
   }
 
@@ -89,10 +95,10 @@ void NixieTube::Controller::setDot(uint8_t index, bool en) {
   _setDot(index, en);
 }
 
-void NixieTube::Controller::_setDigits(const uint8_t *ds) {
-  sr_ctrl_.transfer(ds);
-}
+void Controller::_setDigits(const uint8_t *ds) { sr_ctrl_.transfer(ds); }
 
-void NixieTube::Controller::_setDot(int index, bool en) {
+void Controller::_setDot(int index, bool en) {
   digitalWrite(CONFIG::DOT_PINS[index], en ? HIGH : LOW);
 }
+
+} // namespace NixieTube

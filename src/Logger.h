@@ -23,13 +23,12 @@ public:
 
   void setSystemLevel(LogLevel level) { _currentSystemLevel = level; }
 
-  void begin(long baudRate = CONFIG::BAUD_RATE) {
+  void init(uint32_t baudRate = CONFIG::BAUD_RATE) {
     if (is_init_)
       return;
 
     Serial.begin(baudRate);
-    while (!Serial)
-      ;
+
     is_init_ = true;
     info(TAG, "Serial initialized with %ld baudrate.", baudRate);
   }

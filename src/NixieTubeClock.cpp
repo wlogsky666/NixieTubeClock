@@ -5,7 +5,8 @@
 NixieTubeClock::NixieTubeClock() : nt_ctrl_() {}
 
 void NixieTubeClock::init() {
-  Log.begin();
+  // Initialize Log System
+  Log.init();
 
   // Initialize all peripherals
   nt_ctrl_.init();

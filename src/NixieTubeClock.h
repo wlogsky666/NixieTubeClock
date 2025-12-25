@@ -12,6 +12,7 @@ public:
   void test();
 
 private:
+  const char *TAG = "NixieTubeClock";
   NixieTube::Controller nt_ctrl_;
 };
 

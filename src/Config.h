@@ -4,57 +4,45 @@
 namespace CONFIG {
 
 // ====================================================================
-// HARDWARE CONFIGURATION
-// ====================================================================
-
-// Uncomment the definition for the board you are currently using.
-// This will automatically set the default Hardware SPI MOSI and CLK pins.
-// #define BOARD_LINKIT_7688
-// #define BOARD_LINKIT_7697
-
-// ====================================================================
 // Settings
 // ====================================================================
 /**
  * @brief Number of Nixie tubes in the system.
  */
-const int NUM_TUBES = 4;
+const uint8_t NUM_TUBES = 4;
 
 /**
  * @brief Serial port baud rate
  */
-const int BAUD_RATE = 115200;
+const uint32_t BAUD_RATE = 115200;
 
 // ====================================================================
-// SPI PINS ASSIGNMENT
+// SPI Pins Assignment
 // ====================================================================
-// If a board is defined above, MOSI and SCK pins are automatically configured
-// according to the hardware layout.
-#if defined(__AVR_ATmega328P__)
-const int SPI_MOSI = 11;
-const int SPI_SCK = 13;
-const int SPI_LATCH_PIN = 10;
-#elif defined(__LINKIT_7688__)
-const int SPI_MOSI = 21;
-const int SPI_SCK = 23;
-const int SPI_LATCH_PIN = 24;
-#elif defined(__LINKIT_7697__)
-const int SPI_MOSI = 11;
-const int SPI_SCK = 13;
-const int SPI_LATCH_PIN = 10;
-#else
-#error "The dev board is unspecified or not supported！"
-#endif
+// MOSI and SCK pins are automatically configured according to the hardware
+// layout if HW SPI is being used.
+const uint8_t SPI_MOSI = 11;
+const uint8_t SPI_SCK = 13;
+const uint8_t SPI_LATCH_PIN = 10;
 
 // ====================================================================
-// Nixie Tube Decimal Points (Dots)
+// Nixie Tube Decimal Points Pins Assignment (Dots)
 // ====================================================================
 /**
  * @brief Array of digital pins used to control the Nixie tube decimal points.
  *
  * Each pin is connected to the BASE of an MPSA42 NPN transistor.
  */
-const int DOT_PINS[NUM_TUBES] = {4, 5, 6, 7};
+const uint8_t DOT_PINS[NUM_TUBES] = {4, 5, 6, 7};
+
+// ====================================================================
+// RTC DS3032 PIN ASSIGNMENT
+// ====================================================================
+/**
+ * @brief Interrupt pin to trigger time update.
+ */
+const uint8_t RTC_INTR_PIN = 2;
+
 
 } // namespace CONFIG
 

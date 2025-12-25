@@ -1,8 +1,10 @@
 #include "NixieTubeClock.h"
+#include "ClockSystem.h"
 #include "Config.h"
 #include "Logger.h"
 
-NixieTubeClock::NixieTubeClock() : nt_ctrl_() {}
+NixieTubeClock::NixieTubeClock()
+    : nt_ctrl_(), rtc_ctrl_(ClockSystem::RtcController::getInstance()) {}
 
 void NixieTubeClock::init() {
   // Initialize Log System
@@ -10,12 +12,31 @@ void NixieTubeClock::init() {
 
   // Initialize all peripherals
   nt_ctrl_.init();
+  rtc_ctrl_.init();
+  rtc_ctrl_.setCallback(this);
 }
 
+void NixieTubeClock::onTick() { need_update_ = true; }
+
 void NixieTubeClock::test() {
-  nt_ctrl_.setDigits(random(0, 10), random(0, 10), random(0, 10),
-                     random(0, 10));
-  delay(2000);
+
+  if (need_update_) {
+    auto time = rtc_ctrl_.getTimeData();
+    nt_ctrl_.setDigits(time.hour[0], time.hour[1], time.minute[0],
+                       time.minute[1]);
+    nt_ctrl_.setDot(2, time.second[1] % 2 == 1);
+    nt_ctrl_.setDot(3, time.second[1] % 2 == 0);
+
+uint8_t currentHour = time.hour[0] * 10 + time.hour[1];
+    uint8_t currentMinute = time.minute[0] * 10 + time.minute[1];
+    uint8_t currentSecond = time.second[0] * 10 + time.second[1];
+    Log.debug(TAG, "Current hours: %2d, minutes: %2d, seconds: %2d",
+              currentHour, currentMinute, currentSecond);
+
+    if (time.second[0] == 0 && time.second[1] == 0) {
   nt_ctrl_.runAntiPoisoning();
-  delay(3000);
+    }
+
+    need_update_ = false;
+  }
 }

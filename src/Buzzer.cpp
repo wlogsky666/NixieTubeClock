@@ -27,10 +27,12 @@ void Player::playShort(const Note *note, int length) {
     return;
   }
 
+  unsigned long now = millis();
   if (current_melody_.melody && current_melody_.melody != note) {
     saved_melody_ = current_melody_;
-    if (next_note_time_ > millis()) {
-      saved_remaining_note_time_ = next_note_time_ - millis();
+    unsigned long elapsed = now - last_note_ms_;
+    if (elapsed < current_note_duration_) {
+      saved_remaining_note_time_ = current_note_duration_ - elapsed;
     } else {
       saved_remaining_note_time_ = 0;
     }
@@ -45,7 +47,8 @@ void Player::run() {
     return;
   }
 
-  if (millis() >= next_note_time_) {
+  unsigned long now = millis();
+  if (now - last_note_ms_ >= current_note_duration_) {
     current_melody_.step++;
     if (current_melody_.step < current_melody_.len) {
       playTone(current_melody_.melody[current_melody_.step]);
@@ -56,7 +59,7 @@ void Player::run() {
         saved_melody_ = MelodyState(nullptr, 0, -1);
 
         playTone(current_melody_.melody[current_melody_.step]);
-        next_note_time_ = millis() + saved_remaining_note_time_;
+        current_note_duration_ = saved_remaining_note_time_;
       } else {
         noTone(pin_);
         current_melody_ = MelodyState(nullptr, 0, -1);
@@ -71,7 +74,8 @@ void Player::playTone(const Note &note) {
   } else {
     noTone(pin_);
   }
-  next_note_time_ = millis() + note.duration;
+  last_note_ms_ = millis();
+  current_note_duration_ = note.duration;
 }
 
 } // namespace Buzzer

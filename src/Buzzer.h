@@ -35,7 +35,8 @@ private:
   const uint8_t pin_;
   MelodyState current_melody_{nullptr, 0, -1};
   MelodyState saved_melody_{nullptr, 0, -1};
-  unsigned long next_note_time_ = 0;
+  unsigned long last_note_ms_ = 0;
+  unsigned long current_note_duration_ = 0;
   unsigned long saved_remaining_note_time_ = 0;
 
   void playTone(const Note &note);

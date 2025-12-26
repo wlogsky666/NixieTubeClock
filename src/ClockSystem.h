@@ -11,7 +11,9 @@ struct TimeData {
 };
 
 class ITickCallback {
-public:
+  friend class RtcController;
+
+private:
   /**
    * @brief Callback function type for RTC tick events.
    * @note Since this is called from an ISR, the function MUST NOT use

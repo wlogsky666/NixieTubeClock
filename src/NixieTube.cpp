@@ -32,67 +32,55 @@ static void generateRandomDigits(uint8_t r[], int num_tubes) {
   }
 }
 
-void Controller::runAntiPoisoning(int cycles = 1) {
-  Log.debug(TAG, "Running Auto Poisoning Process, cycles = %d", cycles);
-  int roll_duration_ms = 200;
-  int fade_duration_ms = 1500;
-  int lock_delay_duration_ms = 500;
-  int total_animation_time = roll_duration_ms + fade_duration_ms;
-  for (int c = 0; c < cycles; ++c) {
-    long start_time = millis();
-    int current_delay = 10;
-
-    // FAST FLICKER AND DECELERATION PHASE
-    uint8_t ds[num_tubes_] = {0};
-    while (millis() - start_time < total_animation_time) {
-
-      long elapsed_time = millis() - start_time;
-
-      // Check if we are in the deceleration phase
-      if (elapsed_time > roll_duration_ms) {
-        long fade_elapsed = elapsed_time - roll_duration_ms;
-        current_delay = map(fade_elapsed, 0, fade_duration_ms, 10, 150);
+void Controller::run() {
+  if (rolling_step_ >= 0) {
+    // Perform anti poisoning process
+    unsigned long now = millis();
+    if (now - last_rolling_time_ >= CONFIG::ROLLING_INTERVAL) {
+      generateRandomDigits(rolling_digit_state_, num_tubes_);
+      last_rolling_time_ = now;
+      for (uint8_t i = 0; i < rolling_step_; i++) {
+        rolling_digit_state_[i] = digit_state_[i];
       }
-
-      // Generate new random digits for all tubes
-      generateRandomDigits(ds, num_tubes_);
-      _setDigits(ds);
-      for (int i = 0; i < num_tubes_; ++i) {
-        _setDot(i, random(0, 2));
-      }
-
-      delay(current_delay);
-    }
-
-    // SEQUENTIAL LOCKING (Digit-by-Digit Stop)
-    for (int i = 0; i < num_tubes_; i++) {
-      long lock_cycle_start = millis();
-      while (millis() - lock_cycle_start < lock_delay_duration_ms) {
-        generateRandomDigits(ds, num_tubes_);
-
-        // Re-copy the digits from digit states
-        for (int j = 0; j <= i; j++) {
-          ds[j] = digit_state_[j];
-        }
-
-        _setDigits(ds);
+      _setDigits(rolling_digit_state_);
+      for (int i = 0; i < num_tubes_; i++) {
         _setDot(i, dot_state_[i]);
-        delay(current_delay);
       }
     }
 
+    if (now - last_lock_time_ >= CONFIG::ROLLING_LOCK_INTERVAL[rolling_step_]) {
+      rolling_step_++;
+      last_lock_time_ = now;
+
+      if (rolling_step_ >= num_tubes_) {
+        rolling_step_ = -1;
+        is_state_changed_ = true;
+      }
+    }
+  } else if (is_state_changed_) {
     _setDigits(digit_state_);
+    for (int i = 0; i < num_tubes_; i++) {
+      _setDot(i, dot_state_[i]);
+    }
+    is_state_changed_ = false;
   }
+}
+
+void Controller::runAntiPoisoning() {
+  Log.debug(TAG, "Running Auto Poisoning Process");
+  generateRandomDigits(rolling_digit_state_, num_tubes_);
+  rolling_step_ = 0;
+  last_lock_time_ = millis();
+  last_rolling_time_ = millis();
 }
 
 void Controller::setDot(uint8_t index, bool en) {
   if (index >= num_tubes_) {
-    Log.error(TAG, "Invalid index of tubes, idx = %d", index);
     return;
   }
 
   dot_state_[index] = en;
-  _setDot(index, en);
+  is_state_changed_ = true;
 }
 
 void Controller::_setDigits(const uint8_t *ds) { sr_ctrl_.transfer(ds); }

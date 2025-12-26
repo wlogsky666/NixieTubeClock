@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Arduino.h>
+
 namespace CONFIG {
 
 // ====================================================================
@@ -15,6 +17,16 @@ const uint8_t NUM_TUBES = 4;
  * @brief Serial port baud rate
  */
 const uint32_t BAUD_RATE = 115200;
+
+/**
+ * @brief Interval between each digit shuffle during anti-poisoning (ms).
+ */
+const uint16_t ROLLING_INTERVAL = 10;
+
+/**
+ * @brief Delay duration before locking each successive tube (ms).
+ */
+const uint16_t ROLLING_LOCK_INTERVAL[NUM_TUBES] = {300, 300, 500, 500};
 
 // ====================================================================
 // SPI Pins Assignment

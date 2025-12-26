@@ -10,15 +10,15 @@ public:
 
   void init();
 
-  void onTick() override;
-
-  void test();
+  void run();
 
 private:
   const char *TAG = "NixieTubeClock";
   ClockSystem::RtcController &rtc_ctrl_;
   NixieTube::Controller nt_ctrl_;
   volatile bool need_update_ = false;
+
+  void onTick() override;
 };
 
 #endif // NIXIE_TUBE_CLOCK_H

@@ -55,6 +55,13 @@ const uint8_t DOT_PINS[NUM_TUBES] = {4, 5, 6, 7};
  */
 const uint8_t RTC_INTR_PIN = 2;
 
+// ====================================================================
+// Buzzer PIN ASSIGNMENT
+// ====================================================================
+/**
+ * @brief PWM output pin for buzzer
+ */
+const uint8_t BUZZER_PIN = 9;
 
 } // namespace CONFIG
 

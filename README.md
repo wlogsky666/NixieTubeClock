@@ -22,5 +22,9 @@ The project uses SPI communication to cascade data through the 74HC595 shift reg
 5. I2C Connection: Connect RTC DS3231 SDA to A4 and SCL to A5. The SQW (IRQ) is connected to D2 (Arduino IRQ pin).
 6. Buzzer: Connect to D9
 
+#### IC layout (74HC595 and K155ID1)
 
+<img width="1269" height="610" alt="image" src="https://github.com/user-attachments/assets/1f477ce7-b909-47db-a01f-d2ef4455d49b" />
+
+#### Schematics
 <img width="1190" height="845" alt="SCH_Schematic1_1-P1_2025-12-25 (1)" src="https://github.com/user-attachments/assets/b46e6157-7f21-436c-b92d-39e7639a39b7" />

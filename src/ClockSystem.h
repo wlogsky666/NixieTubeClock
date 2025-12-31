@@ -66,7 +66,7 @@ private:
 
   volatile bool tick_flag_;
   void _handleInterrupt();
-  static void isrWrapper();
+  static void _isrWrapper();
 };
 
 } // namespace ClockSystem

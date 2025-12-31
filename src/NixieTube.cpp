@@ -19,11 +19,13 @@ void Controller::init() {
 }
 
 void Controller::clear() {
-  const uint8_t zeros[num_tubes_] = {0};
-  setDigits(zeros);
   for (int i = 0; i < num_tubes_; ++i) {
-    setDot(i, 0);
+    digit_state_[i] = 10;
+    dot_state_[i] = 0;
+    _setDot(i, dot_state_[i]);
   }
+
+  _setDigits(digit_state_);
 }
 
 static void generateRandomDigits(uint8_t r[], int num_tubes) {
@@ -32,7 +34,9 @@ static void generateRandomDigits(uint8_t r[], int num_tubes) {
   }
 }
 
-void Controller::run() {
+Event Controller::run() {
+  Event event = NixieTube::Event::NONE;
+
   if (rolling_step_ >= 0) {
     // Perform anti poisoning process
     unsigned long now = millis();
@@ -46,15 +50,20 @@ void Controller::run() {
       for (int i = 0; i < num_tubes_; i++) {
         _setDot(i, dot_state_[i]);
       }
+      event = Event::ROLLING;
     }
 
     if (now - last_lock_time_ >= CONFIG::ROLLING_LOCK_INTERVAL[rolling_step_]) {
       rolling_step_++;
       last_lock_time_ = now;
+      is_state_changed_ = true;
 
       if (rolling_step_ >= num_tubes_) {
         rolling_step_ = -1;
-        is_state_changed_ = true;
+        event = NixieTube::Event::ALL_SETTLED;
+      } else {
+        // Event::DIGIT_LOCK has higher priority than Event::ROLLING
+        event = Event::DIGIT_LOCK;
       }
     }
   } else if (is_state_changed_) {
@@ -63,7 +72,10 @@ void Controller::run() {
       _setDot(i, dot_state_[i]);
     }
     is_state_changed_ = false;
+    event = Event::NONE;
   }
+
+  return event;
 }
 
 void Controller::runAntiPoisoning() {

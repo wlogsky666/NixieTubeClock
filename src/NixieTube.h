@@ -9,6 +9,8 @@
 
 namespace NixieTube {
 
+enum class Event { NONE, ROLLING, DIGIT_LOCK, ALL_SETTLED };
+
 class Controller {
 public:
   Controller();
@@ -26,7 +28,7 @@ public:
   /**
    * @brief Check whether the task is pending.
    */
-  void run();
+  Event run();
 
   /**
    * @brief Performs the Cathode Anti-Poisoning routine.

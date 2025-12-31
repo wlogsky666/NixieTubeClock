@@ -5,8 +5,9 @@
 namespace ClockSystem {
 
 void RtcController::init() {
+  Log.info(TAG, "Searching RTC module...");
   if (!rtc_.begin()) {
-    Log.error("RTC", "Could not find RTC module");
+    Log.error(TAG, "Could not find RTC module");
     return;
   }
 
@@ -17,7 +18,7 @@ void RtcController::init() {
 
   pinMode(CONFIG::RTC_INTR_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(CONFIG::RTC_INTR_PIN),
-                  RtcController::isrWrapper, FALLING);
+                  RtcController::_isrWrapper, FALLING);
 
   rtc_.disable32K();
   rtc_.clearAlarm(1);
@@ -65,7 +66,7 @@ void RtcController::_handleInterrupt() {
     cb_->onTick();
 }
 
-void ClockSystem::RtcController::isrWrapper() {
+void ClockSystem::RtcController::_isrWrapper() {
   getInstance()._handleInterrupt();
 }
 

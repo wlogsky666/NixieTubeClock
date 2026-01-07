@@ -56,6 +56,12 @@ public:
    */
   void update();
 
+  /**
+   * @brief Adjust the datetime in the RTC IC.
+   * @param dt Datetime need to store in RTC IC.
+   */
+  void adjust(DateTime dt);
+
 private:
   RtcController() = default;
 
@@ -65,6 +71,7 @@ private:
   ITickCallback *cb_ = nullptr;
 
   volatile bool tick_flag_;
+  bool inited_ = false;
   void _handleInterrupt();
   static void _isrWrapper();
 };

@@ -21,6 +21,7 @@ private:
   volatile bool need_update_ = false;
 
   void onTick() override;
+  void checkSerial();
 };
 
 #endif // NIXIE_TUBE_CLOCK_H

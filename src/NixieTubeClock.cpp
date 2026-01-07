@@ -4,6 +4,11 @@
 #include "Config.h"
 #include "Logger.h"
 
+#define IN_RANGE(val, min, max) ((val) >= (min) && (val) <= (max))
+#define IS_TIME_VALID(y, m, d, h, mm, s)                                       \
+  (IN_RANGE(y, 2000, 2099) && IN_RANGE(m, 1, 12) && IN_RANGE(d, 1, 31) &&      \
+   IN_RANGE(h, 0, 23) && IN_RANGE(mm, 0, 59) && IN_RANGE(s, 0, 59))
+
 NixieTubeClock::NixieTubeClock()
     : nt_ctrl_(), rtc_ctrl_(ClockSystem::RtcController::getInstance()),
       buzzer_(CONFIG::BUZZER_PIN) {}
@@ -29,6 +34,42 @@ const Buzzer::Note FINISH_CHIME[] = {{880, 50}, {0, 60}, {1175, 200}};
 // {2637, 150}};
 
 void NixieTubeClock::onTick() { need_update_ = true; }
+
+void NixieTubeClock::checkSerial() {
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+
+    if (input.length() == 0) {
+      return;
+    }
+
+    char cmd = input.charAt(0);
+    cmd = toupper(cmd);
+
+    if (cmd == 'T') {
+      // DateTime format: T20260108143000
+      if (input.length() >= 15) {
+        int year = input.substring(1, 5).toInt();
+        int mon = input.substring(5, 7).toInt();
+        int day = input.substring(7, 9).toInt();
+        int hour = input.substring(9, 11).toInt();
+        int minute = input.substring(11, 13).toInt();
+        int second = input.substring(13, 15).toInt();
+
+        if (IS_TIME_VALID(year, mon, day, hour, minute, second)) {
+          rtc_ctrl_.adjust(DateTime(year, mon, day, hour, minute, second));
+        } else {
+          Log.error("NIXIE", "Invalid DateTime values!");
+        }
+      } else {
+        Log.error("NIXIE", "Format error. Expected: TYYYYMMDDHHMMSS");
+      }
+    } else {
+      Log.error(TAG, "Error: Unsupported cmd: %c", cmd);
+    }
+  }
+}
 
 void NixieTubeClock::run() {
   if (need_update_) {
@@ -76,4 +117,5 @@ void NixieTubeClock::run() {
   }
 
   buzzer_.run();
+  checkSerial();
 }

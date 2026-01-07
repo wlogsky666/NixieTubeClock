@@ -28,6 +28,7 @@ void RtcController::init() {
   rtc_.writeSqwPinMode(DS3231_SquareWave1Hz);
 
   update();
+  inited_ = true;
   Log.info(TAG, "RTC System initialized.");
 }
 
@@ -41,6 +42,10 @@ const TimeData RtcController::getTimeData() {
 }
 
 void RtcController::update() {
+  if (!inited_) {
+    return;
+  }
+
   bool should_update = false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     if (tick_flag_) {
@@ -58,6 +63,16 @@ void RtcController::update() {
     now_.second[0] = dt.second() / 10;
     now_.second[1] = dt.second() % 10;
   }
+}
+
+void RtcController::adjust(DateTime dt) {
+  if (!inited_) {
+    return;
+  }
+
+  rtc_.adjust(dt);
+  Log.info(TAG, "Adjust RTC time to %d/%02d/%02d %02d:%02d:%02d", dt.year(),
+           dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second());
 }
 
 void RtcController::_handleInterrupt() {
